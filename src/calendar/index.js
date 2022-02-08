@@ -1,25 +1,25 @@
-import React, {Component} from 'react';
+import React, { Component } from "react";
 import {
   View,
   ViewPropTypes,
   ScrollView,
   Dimensions,
   ActivityIndicator,
-  Platform
-} from 'react-native';
-import PropTypes from 'prop-types';
+  Platform,
+} from "react-native";
+import PropTypes from "prop-types";
 
-import XDate from 'xdate';
-import dateutils from '../dateutils';
-import {xdateToData, parseDate} from '../interface';
-import styleConstructor from './style';
-import Day from './day/basic';
-import UnitDay from './day/period';
-import MultiDotDay from './day/multi-dot';
-import MultiPeriodDay from './day/multi-period';
-import SingleDay from './day/custom';
-import CalendarHeader from './header';
-import shouldComponentUpdate from './updater';
+import XDate from "xdate";
+import dateutils from "../dateutils";
+import { xdateToData, parseDate } from "../interface";
+import styleConstructor from "./style";
+import Day from "./day/basic";
+import UnitDay from "./day/period";
+import MultiDotDay from "./day/multi-dot";
+import MultiPeriodDay from "./day/multi-period";
+import SingleDay from "./day/custom";
+import CalendarHeader from "./header";
+import shouldComponentUpdate from "./updater";
 
 //Fallback when RN version is < 0.44
 const viewPropTypes = ViewPropTypes || View.propTypes;
@@ -35,7 +35,7 @@ let onPressArrowRightTriggered = false;
 // to throttle back-to-back triggering of onPressArrowLeft in horizontal calendar
 let onPressArrowLeftTriggered = false;
 
-const timezoneOffset =  new Date().getTimezoneOffset() * 60 * 1000;
+const timezoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
 
 class Calendar extends Component {
   static propTypes = {
@@ -45,7 +45,7 @@ class Calendar extends Component {
     markedDates: PropTypes.object,
 
     // Specify style for calendar container element. Default = {}
-    style: viewPropTypes.style,
+    style: PropTypes.style,
     // Initially visible month. Default = Date()
     current: PropTypes.any,
     // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
@@ -114,7 +114,7 @@ class Calendar extends Component {
     // to show a loader
     loading: PropTypes.bool,
     // provide a custom loader component
-    LoaderComponent: PropTypes.any
+    LoaderComponent: PropTypes.any,
   };
 
   constructor(props) {
@@ -128,7 +128,7 @@ class Calendar extends Component {
     }
     this.state = {
       currentMonth,
-      horizontal: props.horizontal
+      horizontal: props.horizontal,
     };
 
     this.updateMonth = this.updateMonth.bind(this);
@@ -142,56 +142,72 @@ class Calendar extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const current= parseDate(nextProps.current);
-    if (current && current.toString('yyyy MM') !== this.state.currentMonth.toString('yyyy MM')) {
+    const current = parseDate(nextProps.current);
+    if (
+      current &&
+      current.toString("yyyy MM") !==
+        this.state.currentMonth.toString("yyyy MM")
+    ) {
       this.setState({
-        currentMonth: current.clone()
+        currentMonth: current.clone(),
       });
     }
     this.setState({
-      horizontal: nextProps.horizontal
+      horizontal: nextProps.horizontal,
     });
   }
 
   // scroll the horizontal calendar so that selected date is visible
   componentDidUpdate() {
     const horizontalScrollView = this.horizontalScrollViewRef.current;
-    if (horizontalScrollView
-      && this.props.autoHorizontalScroll
-      && (this.props.showPastDatesInHorizontal === undefined)) {
-      const windowWidth = Dimensions.get('window').width;
+    if (
+      horizontalScrollView &&
+      this.props.autoHorizontalScroll &&
+      this.props.showPastDatesInHorizontal === undefined
+    ) {
+      const windowWidth = Dimensions.get("window").width;
       horizontalScrollView.scrollTo({
         x: horizontalScrollViewOffset * windowWidth,
-        animated: true
+        animated: true,
       });
     }
   }
 
   updateMonth(day, doNotTriggerListeners) {
-    if (day.toString('yyyy MM') === this.state.currentMonth.toString('yyyy MM')) {
+    if (
+      day.toString("yyyy MM") === this.state.currentMonth.toString("yyyy MM")
+    ) {
       return;
     }
-    this.setState({
-      currentMonth: day.clone()
-    }, () => {
-      if (!doNotTriggerListeners) {
-        const currMont = this.state.currentMonth.clone();
-        if (this.props.onMonthChange) {
-          this.props.onMonthChange(xdateToData(currMont));
-        }
-        if (this.props.onVisibleMonthsChange) {
-          this.props.onVisibleMonthsChange([xdateToData(currMont)]);
+    this.setState(
+      {
+        currentMonth: day.clone(),
+      },
+      () => {
+        if (!doNotTriggerListeners) {
+          const currMont = this.state.currentMonth.clone();
+          if (this.props.onMonthChange) {
+            this.props.onMonthChange(xdateToData(currMont));
+          }
+          if (this.props.onVisibleMonthsChange) {
+            this.props.onVisibleMonthsChange([xdateToData(currMont)]);
+          }
         }
       }
-    });
+    );
   }
 
   _handleDayInteraction(date, interaction) {
     const day = parseDate(date);
     const minDate = parseDate(this.props.minDate);
     const maxDate = parseDate(this.props.maxDate);
-    if (!(minDate && !dateutils.isGTE(day, minDate)) && !(maxDate && !dateutils.isLTE(day, maxDate))) {
-      const shouldUpdateMonth = this.props.disableMonthChange === undefined || !this.props.disableMonthChange;
+    if (
+      !(minDate && !dateutils.isGTE(day, minDate)) &&
+      !(maxDate && !dateutils.isLTE(day, maxDate))
+    ) {
+      const shouldUpdateMonth =
+        this.props.disableMonthChange === undefined ||
+        !this.props.disableMonthChange;
       if (shouldUpdateMonth) {
         this.updateMonth(day);
       }
@@ -216,25 +232,31 @@ class Calendar extends Component {
   renderDay(day, id) {
     const minDate = parseDate(this.props.minDate);
     const maxDate = parseDate(this.props.maxDate);
-    let state = '';
+    let state = "";
     if (this.props.disabledByDefault) {
-      state = 'disabled';
-    } else if ((minDate && !dateutils.isGTE(day, minDate)) || (maxDate && !dateutils.isLTE(day, maxDate))) {
-      state = 'disabled';
+      state = "disabled";
+    } else if (
+      (minDate && !dateutils.isGTE(day, minDate)) ||
+      (maxDate && !dateutils.isLTE(day, maxDate))
+    ) {
+      state = "disabled";
     } else if (!dateutils.sameMonth(day, this.state.currentMonth)) {
-      state = 'disabled';
+      state = "disabled";
     } else if (dateutils.sameDate(day, XDate())) {
-      state = 'today';
+      state = "today";
     }
 
-    if (!dateutils.sameMonth(day, this.state.currentMonth) && this.props.hideExtraDays) {
-      return (<View key={id} style={{flex: 1}}/>);
+    if (
+      !dateutils.sameMonth(day, this.state.currentMonth) &&
+      this.props.hideExtraDays
+    ) {
+      return <View key={id} style={{ flex: 1 }} />;
     }
 
     const DayComp = this.getDayComponent();
     const date = day.getDate();
     return (
-      <View style={{flex: 1, alignItems: 'center'}} key={id}>
+      <View style={{ flex: 1, alignItems: "center" }} key={id}>
         <DayComp
           state={state}
           theme={this.props.theme}
@@ -262,15 +284,16 @@ class Calendar extends Component {
     let calendarUpdated = false;
 
     // going left
-    if (contentOffset.x === startReachedThreshold
-      && !onPressArrowLeftTriggered) {
+    if (
+      contentOffset.x === startReachedThreshold &&
+      !onPressArrowLeftTriggered
+    ) {
       if (this.props.showPastDatesInHorizontal !== undefined) {
         // don't auto select previous month when past dates are hidden
         const selectedMonthTime = this.state.currentMonth.getTime();
-        const oneDayTime = (24 * 3600 * 1000);
-        const nextValidTime = new Date().setHours(0,0,0,0)
-          + oneDayTime
-          + timezoneOffset;
+        const oneDayTime = 24 * 3600 * 1000;
+        const nextValidTime =
+          new Date().setHours(0, 0, 0, 0) + oneDayTime + timezoneOffset;
         if (selectedMonthTime > nextValidTime) {
           calendarUpdated = true;
         }
@@ -289,9 +312,11 @@ class Calendar extends Component {
     }
 
     // going right
-    if (endReachedThreshold
-      && (travelledWidth + endReachedThreshold) > contentWidth
-      && !onPressArrowRightTriggered) {
+    if (
+      endReachedThreshold &&
+      travelledWidth + endReachedThreshold > contentWidth &&
+      !onPressArrowRightTriggered
+    ) {
       this.props.onPressArrowRight(this.state.currentMonth, this.addMonth);
       calendarUpdated = true;
       onPressArrowRightTriggered = true;
@@ -302,7 +327,8 @@ class Calendar extends Component {
 
     if (calendarUpdated && horizontalScrollView) {
       horizontalScrollView.scrollTo({
-        x: 50, animated: false
+        x: 50,
+        animated: false,
       });
     }
   }
@@ -313,16 +339,16 @@ class Calendar extends Component {
     }
 
     switch (this.props.markingType) {
-    case 'period':
-      return UnitDay;
-    case 'multi-dot':
-      return MultiDotDay;
-    case 'multi-period':
-      return MultiPeriodDay;
-    case 'custom':
-      return SingleDay;
-    default:
-      return Day;
+      case "period":
+        return UnitDay;
+      case "multi-dot":
+        return MultiDotDay;
+      case "multi-period":
+        return MultiPeriodDay;
+      case "custom":
+        return SingleDay;
+      default:
+        return Day;
     }
   }
 
@@ -330,7 +356,8 @@ class Calendar extends Component {
     if (!this.props.markedDates) {
       return false;
     }
-    const dates = this.props.markedDates[day.toString('yyyy-MM-dd')] || EmptyArray;
+    const dates =
+      this.props.markedDates[day.toString("yyyy-MM-dd")] || EmptyArray;
     if (dates.length || dates) {
       return dates;
     } else {
@@ -338,13 +365,22 @@ class Calendar extends Component {
     }
   }
 
-  renderWeekNumber (weekNumber) {
-    return <Day key={`week-${weekNumber}`} theme={this.props.theme} marking={{disableTouchEvent: true}} state='disabled'>{weekNumber}</Day>;
+  renderWeekNumber(weekNumber) {
+    return (
+      <Day
+        key={`week-${weekNumber}`}
+        theme={this.props.theme}
+        marking={{ disableTouchEvent: true }}
+        state="disabled"
+      >
+        {weekNumber}
+      </Day>
+    );
   }
 
   renderWeek(days, id) {
     const week = [];
-    let validTime = new Date().setHours(0,0,0,0); // ignoring hours, mins, secs, msecs
+    let validTime = new Date().setHours(0, 0, 0, 0); // ignoring hours, mins, secs, msecs
     if (this.props.showPastDatesInHorizontal !== undefined) {
       validTime -= this.props.showPastDatesInHorizontal * (24 * 60 * 60 * 1000);
     }
@@ -352,8 +388,10 @@ class Calendar extends Component {
       const dayTime = day.getTime();
 
       // don't show past days in horizontal calendar
-      if (this.state.horizontal
-        && this.props.showPastDatesInHorizontal !== undefined) {
+      if (
+        this.state.horizontal &&
+        this.props.showPastDatesInHorizontal !== undefined
+      ) {
         if (dayTime >= validTime) {
           week.push(this.renderDay(day, id2));
         }
@@ -365,14 +403,17 @@ class Calendar extends Component {
       if (dayTime === parseDate(this.props.current).getTime()) {
         horizontalScrollViewOffset = id;
       }
-
     }, this);
 
     if (this.props.showWeekNumbers) {
       week.unshift(this.renderWeekNumber(days[days.length - 1].getWeek()));
     }
 
-    return (<View style={this.style.week} key={id}>{week}</View>);
+    return (
+      <View style={this.style.week} key={id}>
+        {week}
+      </View>
+    );
   }
 
   getCalendarHeaderComponent() {
@@ -388,7 +429,7 @@ class Calendar extends Component {
       return this.props.LoaderComponent;
     } else {
       return (
-        <View style={{ flex: 1, justifyContent: 'center' }}>
+        <View style={{ flex: 1, justifyContent: "center" }}>
           <ActivityIndicator />
         </View>
       );
@@ -396,11 +437,11 @@ class Calendar extends Component {
   }
 
   showCalendar(weeks) {
-    const windowWidth = Dimensions.get('window').width;
+    const windowWidth = Dimensions.get("window").width;
     if (this.state.horizontal) {
       return (
         <ScrollView
-          contentContainerStyle={Platform.OS === 'web' ? { flex: 1 } : {}}
+          contentContainerStyle={Platform.OS === "web" ? { flex: 1 } : {}}
           style={[this.style.monthView, { marginBottom: 10 }]}
           horizontal
           scrollEventThrottle={500}
@@ -408,35 +449,27 @@ class Calendar extends Component {
           ref={this.horizontalScrollViewRef}
         >
           {weeks}
-          {
-            this.props.loading ?
-              <View style={[
+          {this.props.loading ? (
+            <View
+              style={[
                 this.style.loaderContainer,
                 {
-                  width: windowWidth
-                }
-              ]}>
-                {
-                  this.showLoader()
-                }
-              </View>
-              : null
-          }
+                  width: windowWidth,
+                },
+              ]}
+            >
+              {this.showLoader()}
+            </View>
+          ) : null}
         </ScrollView>
       );
     } else {
       return (
         <View style={this.style.monthView}>
           {weeks}
-          {
-            this.props.loading ?
-              <View style={this.style.loaderContainer}>
-                {
-                  this.showLoader()
-                }
-              </View>
-              : null
-          }
+          {this.props.loading ? (
+            <View style={this.style.loaderContainer}>{this.showLoader()}</View>
+          ) : null}
         </View>
       );
     }
@@ -451,9 +484,16 @@ class Calendar extends Component {
     let indicator;
     const current = parseDate(this.props.current);
     if (current) {
-      const lastMonthOfDay = current.clone().addMonths(1, true).setDate(1).addDays(-1).toString('yyyy-MM-dd');
-      if (this.props.displayLoadingIndicator &&
-        !(this.props.markedDates && this.props.markedDates[lastMonthOfDay])) {
+      const lastMonthOfDay = current
+        .clone()
+        .addMonths(1, true)
+        .setDate(1)
+        .addDays(-1)
+        .toString("yyyy-MM-dd");
+      if (
+        this.props.displayLoadingIndicator &&
+        !(this.props.markedDates && this.props.markedDates[lastMonthOfDay])
+      ) {
         indicator = true;
       }
     }
@@ -479,11 +519,9 @@ class Calendar extends Component {
           onPressListView={this.props.onPressListView}
           onPressGridView={this.props.onPressGridView}
         />
-        {
-          this.showCalendar(weeks)
-        }
-
-      </View>);
+        {this.showCalendar(weeks)}
+      </View>
+    );
   }
 }
 
